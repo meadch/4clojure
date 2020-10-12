@@ -11,17 +11,30 @@
 ; - You must visit each edge exactly once.
 ; - All edges are undirected.
 
-(= true (__ [[:a :b]]))
+(defn can-tour? [edges]
+  (let [vectors (set (apply concat edges))
+        tour (fn tour [node untraveled-edges]
+               (or (empty? untraveled-edges)
+                   (some true? (map-indexed (fn [i, edge]
+                                              (cond (some #(= node %) edge)
+                                                    (let [[a b] edge
+                                                          target (if (= a node) b a)
+                                                          remaining-edges (concat (subvec untraveled-edges 0 i) (subvec untraveled-edges (inc i)))]
+                                                      (tour target (vec remaining-edges)))
+                                                    :else false)) untraveled-edges))))]
+    (boolean (some #(true? %) (map #(tour % edges) vectors)))))
 
-(= false (__ [[:a :a] [:b :b]]))
+(= true (can-tour? [[:a :b]]))
 
-(= false (__ [[:a :b] [:a :b] [:a :c] [:c :a]
-              [:a :d] [:b :d] [:c :d]]))
+(= false (can-tour? [[:a :a] [:b :b]]))
 
-(= true (__ [[1 2] [2 3] [3 4] [4 1]]))
+(= false (can-tour? [[:a :b] [:a :b] [:a :c] [:c :a]
+                     [:a :d] [:b :d] [:c :d]]))
 
-(= true (__ [[:a :b] [:a :c] [:c :b] [:a :e]
-             [:b :e] [:a :d] [:b :d] [:c :e]
-             [:d :e] [:c :f] [:d :f]]))
+(= true (can-tour? [[1 2] [2 3] [3 4] [4 1]]))
 
-(= false (__ [[1 2] [2 3] [2 4] [2 5]]))
+(= true (can-tour? [[:a :b] [:a :c] [:c :b] [:a :e]
+                    [:b :e] [:a :d] [:b :d] [:c :e]
+                    [:d :e] [:c :f] [:d :f]]))
+
+(= false (can-tour? [[1 2] [2 3] [2 4] [2 5]]))
