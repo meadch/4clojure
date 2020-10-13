@@ -12,8 +12,32 @@
 
 ;; Write a function that accepts a board, and returns a board representing the next generation of cells.
 
+(defn next-game-state [board]
+  (let [alive \#
+        dead " "
+        get-neighbors (fn get-neighbors [r c board]
+                        (map #(get-in board %) (filter (fn [coords] (and (not= coords [r c]) (not (nil? (get-in board coords)))))
+                                                       (for [x (range (dec r) (+ r 2))
+                                                             y (range (dec c) (+ c 2))] [x, y]))))]
+    (map-indexed (fn [i e]
+                 (apply str (map-indexed (fn [j c]
+                                (let [neighbors (get-neighbors i j board)
+                                      live-neighbors (count (filter #(= % alive) neighbors))
+                                      alive? (= c \#)
+                                      dead? (not alive?)]
+                                  (cond (and alive? 
+                                             (< live-neighbors 2))        dead
+                                        (and alive? 
+                                             (or (= 2 live-neighbors) 
+                                                 (= 3 live-neighbors)))   alive
+                                        (and alive? 
+                                             (> live-neighbors 3))        dead
+                                        (and dead? 
+                                             (= 3 live-neighbors))        alive
+                                        :else                             dead))) e))) board)))
 
-(= (__ ["      "
+
+(= (next-game-state ["      "
         " ##   "
         " ##   "
         "   ## "
@@ -27,7 +51,7 @@
     "      "])
 
 
-(= (__ ["     "
+(= (next-game-state ["     "
         "     "
         " ### "
         "     "
@@ -39,7 +63,7 @@
     "     "])
 
 
-(= (__ ["      "
+(= (next-game-state ["      "
         "      "
         "  ### "
         " ###  "
