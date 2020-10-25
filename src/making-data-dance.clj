@@ -6,15 +6,20 @@
 ;Special Restrictions
 ;proxy
 
-(= "1, 2, 3" (str (__ 2 1 3)))
+(defn make-dance [& numbers]
+  (reify clojure.lang.ISeq
+    (toString [_] (apply str (interpose ", " (sort numbers))))
+    (seq [_] (if-not (nil? numbers) (distinct numbers)))))
 
-(= '(2 1 3) (seq (__ 2 1 3)))
+(= "1, 2, 3" (str (make-dance 2 1 3)))
 
-(= '(2 1 3) (seq (__ 2 1 3 3 1 2)))
+(= '(2 1 3) (seq (make-dance 2 1 3)))
 
-(= '(1) (seq (apply __ (repeat 5 1))))
+(= '(2 1 3) (seq (make-dance 2 1 3 3 1 2)))
 
-(= "1, 1, 1, 1, 1" (str (apply __ (repeat 5 1))))
+(= '(1) (seq (apply make-dance (repeat 5 1))))
 
-(and (= nil (seq (__)))
-     (=  "" (str (__))))
+(= "1, 1, 1, 1, 1" (str (apply make-dance (repeat 5 1))))
+
+(and (= nil (seq (make-dance)))
+     (=  "" (str (make-dance))))
